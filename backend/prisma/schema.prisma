@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  password       String
+  role           Role
+  createdAt      DateTime        @default(now())
+  challans       Challan[]
+  stockMovements StockMovement[]
+}
+
+model Customer {
+  id           String         @id @default(uuid())
+  name         String
+  mobile       String
+  email        String?
+  businessName String?
+  gstNumber    String?
+  customerType CustomerType
+  address      String
+  status       CustomerStatus @default(ACTIVE)
+  followUpDate DateTime?
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  challans     Challan[]
+}
+
+model Product {
+  id                String          @id @default(uuid())
+  name              String
+  sku               String          @unique
+  category          String
+  unitPrice         Decimal
+  currentStock      Int             @default(0)
+  minimumStock      Int             @default(0)
+  warehouseLocation String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  challanItems      ChallanItem[]
+  stockMovements    StockMovement[]
+}
+
+model StockMovement {
+  id           String       @id @default(uuid())
+  productId    String
+  quantity     Int
+  movementType MovementType
+  reason       String
+  createdBy    String
+  createdAt    DateTime     @default(now())
+  user         User         @relation(fields: [createdBy], references: [id])
+  product      Product      @relation(fields: [productId], references: [id])
+}
+
+model Challan {
+  id            String        @id @default(uuid())
+  challanNumber String        @unique
+  customerId    String
+  totalQuantity Int           @default(0)
+  status        ChallanStatus @default(DRAFT)
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  user          User          @relation(fields: [createdBy], references: [id])
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  items         ChallanItem[]
+}
+
+model ChallanItem {
+  id          String   @id @default(uuid())
+  challanId   String
+  productId   String
+  productName String
+  productSku  String
+  unitPrice   Decimal
+  quantity    Int
+  createdAt   DateTime @default(now())
+  challan     Challan  @relation(fields: [challanId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+enum ChallanStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
