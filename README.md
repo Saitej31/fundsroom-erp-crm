@@ -17,8 +17,7 @@ A full-stack ERP and CRM operations portal built to manage business workflows, c
 - JavaScript
 - HTML
 - CSS
-- Python
-- Flask
+- Node.js
 - Database
 
 ## 📁 Project Structure
